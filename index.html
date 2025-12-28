@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,11 +30,10 @@
             font-size: 2rem;
         }
 
-        .setup-panel,
-        .game-panel {
+        .setup-panel, .game-panel {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             padding: 30px;
             margin-bottom: 20px;
         }
@@ -51,8 +49,7 @@
             color: #334155;
         }
 
-        .form-group input,
-        .form-group textarea {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e2e8f0;
@@ -222,6 +219,24 @@
             background: #f1f5f9 !important;
         }
 
+        .grid-cell.completed {
+            opacity: 0.3;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .grid-cell.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            color: #000;
+            font-weight: bold;
+            text-shadow: 0 0 3px #fff;
+        }
+
         .instructions {
             background: #dbeafe;
             border-radius: 8px;
@@ -248,31 +263,11 @@
             display: none;
         }
 
-        .color-palette {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 5px;
-            margin-top: 10px;
-        }
-
-        .color-swatch {
-            width: 100%;
-            padding-top: 100%;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            position: relative;
-        }
-
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-
         @media (max-width: 768px) {
             .icons-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
-
+            
             .grid-cell {
                 width: 50px;
                 height: 50px;
@@ -285,21 +280,20 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <h1>📝 Ghi Chú Lật Thẻ</h1>
 
         <div id="setupPanel" class="setup-panel">
             <h2 style="margin-bottom: 20px;">Thiết lập bảng</h2>
-
+            
             <div class="grid-setup">
                 <div class="form-group">
-                    <label>Số dòng</label>
+                    <label>Số dòng (A, B, C...)</label>
                     <input type="number" id="rowsInput" value="4" min="1" max="10">
                 </div>
                 <div class="form-group">
-                    <label>Số cột</label>
+                    <label>Số cột (1, 2, 3...)</label>
                     <input type="number" id="colsInput" value="8" min="1" max="15">
                 </div>
             </div>
@@ -320,14 +314,13 @@ Thuyền
 
         <div id="gamePanel" class="hidden">
             <div class="game-panel icons-panel">
-                <h2 style="margin-bottom: 15px;" id="selectionStatus">👆 Chọn loại thẻ</h2>
+                <h2 style="margin-bottom: 15px;" id="selectionStatus"> Chọn loại thẻ hoặc đánh dấu hoàn thành</h2>
                 <div class="icons-grid" id="iconsGrid"></div>
                 <div class="controls">
-                    <button class="btn btn-secondary" onclick="clearSelection()">🗑️ Xóa (Click ô để xóa)</button>
-                    <button class="btn btn-warning" onclick="resetGrid()">🔄 Xóa tất cả</button>
+                    <button class="btn btn-secondary" onclick="clearSelection()">Xóa (Click ô để xóa)</button>
+                    <button class="btn btn-warning" onclick="resetGrid()">Xóa tất cả</button>
                 </div>
             </div>
-
 
             <div class="game-panel">
                 <div class="grid-header">
@@ -337,20 +330,18 @@ Thuyền
                 <div class="grid-container">
                     <div class="game-grid" id="gameGrid"></div>
                 </div>
-                <div>
-                                                                <div class="instructions">
+            </div>
+
+            <div class="instructions">
                 <h3>💡 Hướng dẫn sử dụng:</h3>
                 <ul>
                     <li>1️⃣ Chọn loại thẻ ở trên</li>
                     <li>2️⃣ Click vào ô tương ứng trong bảng để đánh dấu</li>
-                    <li>3️⃣ Click nút "Xóa" rồi click ô để xóa đánh dấu</li>
-                    <li>4️⃣ Sử dụng song song với game để ghi nhớ các ô đã lật!</li>
+                    <li>3️⃣ Click nút "✓ Hoàn thành" rồi click vào ô đã xong để đánh dấu (ô sẽ bị mờ và khóa)</li>
+                    <li>4️⃣ Click nút "Xóa" rồi click ô để xóa đánh dấu</li>
+                    <li>5️⃣ Sử dụng song song với game để ghi nhớ các ô đã lật!</li>
                 </ul>
             </div>
-                </div>
-            </div>
-            
-           
         </div>
     </div>
 
@@ -364,7 +355,9 @@ Thuyền
 
         let icons = [];
         let grid = [];
+        let completedCells = [];
         let selectedIcon = null;
+        let isCompletedMode = false;
         let rows = 4;
         let cols = 8;
 
@@ -375,7 +368,7 @@ Thuyền
         function renderIcons() {
             const iconsGrid = document.getElementById('iconsGrid');
             iconsGrid.innerHTML = '';
-
+            
             icons.forEach(icon => {
                 const btn = document.createElement('button');
                 btn.className = 'icon-btn';
@@ -387,23 +380,49 @@ Thuyền
                 btn.onclick = () => selectIcon(icon.id);
                 iconsGrid.appendChild(btn);
             });
+
+            // Add completed button
+            const completedBtn = document.createElement('button');
+            completedBtn.className = 'icon-btn';
+            completedBtn.style.backgroundColor = '#10b981';
+            if (isCompletedMode) {
+                completedBtn.classList.add('selected');
+            }
+            completedBtn.innerHTML = `<div>✓ Hoàn thành</div><div style="font-size: 12px; opacity: 0.8;">Đánh dấu xong</div>`;
+            completedBtn.onclick = () => selectCompletedMode();
+            iconsGrid.appendChild(completedBtn);
         }
 
         function selectIcon(id) {
             selectedIcon = id;
+            isCompletedMode = false;
+            renderIcons();
+            updateSelectionStatus();
+        }
+
+        function selectCompletedMode() {
+            selectedIcon = null;
+            isCompletedMode = true;
             renderIcons();
             updateSelectionStatus();
         }
 
         function clearSelection() {
             selectedIcon = null;
+            isCompletedMode = false;
             renderIcons();
             updateSelectionStatus();
         }
 
         function updateSelectionStatus() {
             const status = document.getElementById('selectionStatus');
-            status.textContent = selectedIcon !== null ? '✓ Đã chọn - Click vào ô để đánh dấu' : '👆 Chọn loại thẻ';
+            if (isCompletedMode) {
+                status.textContent = '✓ Chế độ đánh dấu hoàn thành - Click vào ô đã hoàn thành';
+            } else if (selectedIcon !== null) {
+                status.textContent = '✓ Đã chọn - Click vào ô để đánh dấu';
+            } else {
+                status.textContent = '👆 Chọn loại thẻ hoặc đánh dấu hoàn thành';
+            }
         }
 
         function createGrid() {
@@ -434,11 +453,11 @@ Thuyền
                 document.getElementById('colsInput').focus();
                 return;
             }
-
+            
             // Parse and validate cards input
             const cardsText = document.getElementById('cardsInput').value.trim();
             const cardsList = cardsText.split('\n').filter(card => card.trim() !== '');
-
+            
             if (cardsList.length === 0) {
                 alert('❌ Vui lòng nhập ít nhất một loại thẻ!');
                 document.getElementById('cardsInput').focus();
@@ -476,12 +495,13 @@ Thuyền
                 label: card,
                 color: generateRandomColor()
             }));
-
+            
             grid = Array(rows).fill(null).map(() => Array(cols).fill(null));
-
+            completedCells = Array(rows).fill(null).map(() => Array(cols).fill(false));
+            
             document.getElementById('setupPanel').classList.add('hidden');
             document.getElementById('gamePanel').classList.remove('hidden');
-
+            
             renderIcons();
             renderGrid();
         }
@@ -490,61 +510,76 @@ Thuyền
             const gameGrid = document.getElementById('gameGrid');
             gameGrid.innerHTML = '';
 
-            // Header row
-            const headerRow = document.createElement('div');
-            headerRow.className = 'grid-row';
-            headerRow.innerHTML = '<div class="grid-label"></div>';
-            for (let c = 0; c < cols; c++) {
-                const cell = document.createElement('div');
-                cell.className = 'grid-label';
-                cell.textContent = c + 1;
-                headerRow.appendChild(cell);
-            }
-            gameGrid.appendChild(headerRow);
-
             // Data rows
             for (let r = 0; r < rows; r++) {
                 const row = document.createElement('div');
                 row.className = 'grid-row';
 
-                const label = document.createElement('div');
-                label.className = 'grid-label';
-                label.textContent = String.fromCharCode(65 + r);
-                row.appendChild(label);
-
                 for (let c = 0; c < cols; c++) {
                     const cell = document.createElement('div');
                     const cellIcon = grid[r][c];
-
+                    const isCompleted = completedCells[r][c];
+                    
                     if (cellIcon) {
                         const icon = icons.find(i => i.id === cellIcon);
                         cell.className = 'grid-cell';
                         cell.style.backgroundColor = icon.color;
                         cell.textContent = icon.label;
+                        
+                        if (isCompleted) {
+                            cell.classList.add('completed');
+                        }
                     } else {
                         cell.className = 'grid-cell empty';
                         cell.textContent = '?';
+                        
+                        if (isCompleted) {
+                            cell.classList.add('completed');
+                        }
                     }
-
+                    
                     cell.onclick = () => handleCellClick(r, c);
                     row.appendChild(cell);
                 }
-
+                
                 gameGrid.appendChild(row);
             }
         }
 
         function handleCellClick(r, c) {
-            if (selectedIcon !== null) {
-                grid[r][c] = selectedIcon;
+            if (isCompletedMode) {
+                // Toggle completed status with confirmation
+                if (!completedCells[r][c]) {
+                    // Marking as completed - ask for confirmation
+                    const cellLabel = grid[r][c] ? icons.find(i => i.id === grid[r][c]).label : 'Trống';
+                    const confirmed = confirm(`Xác nhận đánh dấu ô này là hoàn thành?\n\nÔ hiện tại: ${cellLabel}\n\nÔ sẽ bị khóa và không thể chỉnh sửa!`);
+                    if (confirmed) {
+                        completedCells[r][c] = true;
+                    }
+                } else {
+                    // Unmarking - ask for confirmation
+                    const confirmed = confirm('Bỏ đánh dấu hoàn thành cho ô này?');
+                    if (confirmed) {
+                        completedCells[r][c] = false;
+                    }
+                }
+            } else if (selectedIcon !== null) {
+                // Only allow marking if not completed
+                if (!completedCells[r][c]) {
+                    grid[r][c] = selectedIcon;
+                }
             } else {
-                grid[r][c] = null;
+                // Clear cell if not completed
+                if (!completedCells[r][c]) {
+                    grid[r][c] = null;
+                }
             }
             renderGrid();
         }
 
         function resetGrid() {
             grid = Array(rows).fill(null).map(() => Array(cols).fill(null));
+            completedCells = Array(rows).fill(null).map(() => Array(cols).fill(false));
             renderGrid();
         }
 
@@ -552,10 +587,11 @@ Thuyền
             document.getElementById('setupPanel').classList.remove('hidden');
             document.getElementById('gamePanel').classList.add('hidden');
             grid = [];
+            completedCells = [];
             selectedIcon = null;
+            isCompletedMode = false;
             icons = [];
         }
     </script>
 </body>
-
 </html>
