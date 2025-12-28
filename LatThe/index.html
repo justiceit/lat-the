@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghi Chú Lật Thẻ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .setup-panel,
+        .game-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #64748b;
+        }
+
+        .grid-setup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-warning {
+            background: #f97316;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #ea580c;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .icons-panel {
+            margin-bottom: 20px;
+        }
+
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .icon-btn {
+            padding: 15px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .icon-btn.selected {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            transform: scale(1.05);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls button {
+            flex: 1;
+        }
+
+        .grid-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .game-grid {
+            display: inline-block;
+        }
+
+        .grid-row {
+            display: flex;
+            margin-bottom: 2px;
+        }
+
+        .grid-label {
+            width: 0px;
+            height: 0px;
+            display: none;
+        }
+
+        .grid-cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            transition: all 0.2s;
+            color: white;
+            text-align: center;
+            padding: 2px;
+        }
+
+        .grid-cell:hover {
+            opacity: 0.8;
+        }
+
+        .grid-cell.empty {
+            background: #f8fafc;
+            color: #cbd5e1;
+        }
+
+        .grid-cell.empty:hover {
+            background: #f1f5f9 !important;
+        }
+
+        .instructions {
+            background: #dbeafe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #1e40af;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #1e3a8a;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .color-swatch {
+            width: 100%;
+            padding-top: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .icons-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .grid-cell {
+                width: 50px;
+                height: 50px;
+                font-size: 10px;
+            }
+
+            .grid-setup {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📝 Ghi Chú Lật Thẻ</h1>
+
+        <div id="setupPanel" class="setup-panel">
+            <h2 style="margin-bottom: 20px;">Thiết lập bảng</h2>
+
+            <div class="grid-setup">
+                <div class="form-group">
+                    <label>Số dòng</label>
+                    <input type="number" id="rowsInput" value="4" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label>Số cột</label>
+                    <input type="number" id="colsInput" value="8" min="1" max="15">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Danh sách các loại thẻ</label>
+                <textarea id="cardsInput" placeholder="Nhập mỗi loại thẻ trên một dòng, ví dụ:
+Mỏ Neo
+Thuyền
+">Mỏ Neo
+Thuyền
+</textarea>
+                <small>⚠️ Mỗi loại thẻ trên một dòng. Chỉ được nhập chữ cái và dấu cách!</small>
+            </div>
+
+            <button class="btn btn-primary" onclick="createGrid()">Bắt đầu ghi chú</button>
+        </div>
+
+        <div id="gamePanel" class="hidden">
+            <div class="game-panel icons-panel">
+                <h2 style="margin-bottom: 15px;" id="selectionStatus">👆 Chọn loại thẻ</h2>
+                <div class="icons-grid" id="iconsGrid"></div>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="clearSelection()">🗑️ Xóa (Click ô để xóa)</button>
+                    <button class="btn btn-warning" onclick="resetGrid()">🔄 Xóa tất cả</button>
+                </div>
+            </div>
+
+
+            <div class="game-panel">
+                <div class="grid-header">
+                    <h2>Bảng ghi chú</h2>
+                    <button class="btn btn-danger" onclick="newBoard()">Tạo bảng mới</button>
+                </div>
+                <div class="grid-container">
+                    <div class="game-grid" id="gameGrid"></div>
+                </div>
+                <div>
+                                                                <div class="instructions">
+                <h3>💡 Hướng dẫn sử dụng:</h3>
+                <ul>
+                    <li>1️⃣ Chọn loại thẻ ở trên</li>
+                    <li>2️⃣ Click vào ô tương ứng trong bảng để đánh dấu</li>
+                    <li>3️⃣ Click nút "Xóa" rồi click ô để xóa đánh dấu</li>
+                    <li>4️⃣ Sử dụng song song với game để ghi nhớ các ô đã lật!</li>
+                </ul>
+            </div>
+                </div>
+            </div>
+            
+           
+        </div>
+    </div>
+
+    <script>
+        const colors = [
+            '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
+            '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9',
+            '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+            '#ec4899', '#f43f5e', '#64748b', '#475569', '#1e293b'
+        ];
+
+        let icons = [];
+        let grid = [];
+        let selectedIcon = null;
+        let rows = 4;
+        let cols = 8;
+
+        function generateRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function renderIcons() {
+            const iconsGrid = document.getElementById('iconsGrid');
+            iconsGrid.innerHTML = '';
+
+            icons.forEach(icon => {
+                const btn = document.createElement('button');
+                btn.className = 'icon-btn';
+                btn.style.backgroundColor = icon.color;
+                if (selectedIcon === icon.id) {
+                    btn.classList.add('selected');
+                }
+                btn.innerHTML = `<div>${icon.label}</div><div style="font-size: 12px; opacity: 0.8;">(${icon.id})</div>`;
+                btn.onclick = () => selectIcon(icon.id);
+                iconsGrid.appendChild(btn);
+            });
+        }
+
+        function selectIcon(id) {
+            selectedIcon = id;
+            renderIcons();
+            updateSelectionStatus();
+        }
+
+        function clearSelection() {
+            selectedIcon = null;
+            renderIcons();
+            updateSelectionStatus();
+        }
+
+        function updateSelectionStatus() {
+            const status = document.getElementById('selectionStatus');
+            status.textContent = selectedIcon !== null ? '✓ Đã chọn - Click vào ô để đánh dấu' : '👆 Chọn loại thẻ';
+        }
+
+        function createGrid() {
+            // Validate rows input
+            const rowsValue = document.getElementById('rowsInput').value.trim();
+            if (!rowsValue || isNaN(rowsValue) || rowsValue.includes('.') || rowsValue.includes(',')) {
+                alert('❌ Số dòng phải là số nguyên! Vui lòng nhập lại.');
+                document.getElementById('rowsInput').focus();
+                return;
+            }
+            rows = parseInt(rowsValue);
+            if (rows < 1 || rows > 10) {
+                alert('❌ Số dòng phải từ 1 đến 10!');
+                document.getElementById('rowsInput').focus();
+                return;
+            }
+
+            // Validate cols input
+            const colsValue = document.getElementById('colsInput').value.trim();
+            if (!colsValue || isNaN(colsValue) || colsValue.includes('.') || colsValue.includes(',')) {
+                alert('❌ Số cột phải là số nguyên! Vui lòng nhập lại.');
+                document.getElementById('colsInput').focus();
+                return;
+            }
+            cols = parseInt(colsValue);
+            if (cols < 1 || cols > 15) {
+                alert('❌ Số cột phải từ 1 đến 15!');
+                document.getElementById('colsInput').focus();
+                return;
+            }
+
+            // Parse and validate cards input
+            const cardsText = document.getElementById('cardsInput').value.trim();
+            const cardsList = cardsText.split('\n').filter(card => card.trim() !== '');
+
+            if (cardsList.length === 0) {
+                alert('❌ Vui lòng nhập ít nhất một loại thẻ!');
+                document.getElementById('cardsInput').focus();
+                return;
+            }
+
+            // Validate each card contains only letters and spaces
+            const invalidCards = [];
+            const validCardsList = [];
+            cardsList.forEach((card, index) => {
+                const trimmedCard = card.trim();
+                // Allow letters (including Vietnamese), spaces, and common punctuation
+                if (!/^[a-zA-ZÀ-ỹ\s\-]+$/.test(trimmedCard)) {
+                    invalidCards.push(`Dòng ${index + 1}: "${trimmedCard}"`);
+                } else {
+                    validCardsList.push(trimmedCard);
+                }
+            });
+
+            if (invalidCards.length > 0) {
+                alert('❌ Tên thẻ chỉ được chứa chữ cái và dấu cách!\n\nCác dòng không hợp lệ:\n' + invalidCards.join('\n'));
+                document.getElementById('cardsInput').focus();
+                return;
+            }
+
+            if (validCardsList.length === 0) {
+                alert('❌ Không có loại thẻ hợp lệ nào!');
+                document.getElementById('cardsInput').focus();
+                return;
+            }
+
+            // Create icons array with random colors
+            icons = validCardsList.map((card, index) => ({
+                id: index + 1,
+                label: card,
+                color: generateRandomColor()
+            }));
+
+            grid = Array(rows).fill(null).map(() => Array(cols).fill(null));
+
+            document.getElementById('setupPanel').classList.add('hidden');
+            document.getElementById('gamePanel').classList.remove('hidden');
+
+            renderIcons();
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const gameGrid = document.getElementById('gameGrid');
+            gameGrid.innerHTML = '';
+
+            // Header row
+            const headerRow = document.createElement('div');
+            headerRow.className = 'grid-row';
+            headerRow.innerHTML = '<div class="grid-label"></div>';
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-label';
+                cell.textContent = c + 1;
+                headerRow.appendChild(cell);
+            }
+            gameGrid.appendChild(headerRow);
+
+            // Data rows
+            for (let r = 0; r < rows; r++) {
+                const row = document.createElement('div');
+                row.className = 'grid-row';
+
+                const label = document.createElement('div');
+                label.className = 'grid-label';
+                label.textContent = String.fromCharCode(65 + r);
+                row.appendChild(label);
+
+                for (let c = 0; c < cols; c++) {
+                    const cell = document.createElement('div');
+                    const cellIcon = grid[r][c];
+
+                    if (cellIcon) {
+                        const icon = icons.find(i => i.id === cellIcon);
+                        cell.className = 'grid-cell';
+                        cell.style.backgroundColor = icon.color;
+                        cell.textContent = icon.label;
+                    } else {
+                        cell.className = 'grid-cell empty';
+                        cell.textContent = '?';
+                    }
+
+                    cell.onclick = () => handleCellClick(r, c);
+                    row.appendChild(cell);
+                }
+
+                gameGrid.appendChild(row);
+            }
+        }
+
+        function handleCellClick(r, c) {
+            if (selectedIcon !== null) {
+                grid[r][c] = selectedIcon;
+            } else {
+                grid[r][c] = null;
+            }
+            renderGrid();
+        }
+
+        function resetGrid() {
+            grid = Array(rows).fill(null).map(() => Array(cols).fill(null));
+            renderGrid();
+        }
+
+        function newBoard() {
+            document.getElementById('setupPanel').classList.remove('hidden');
+            document.getElementById('gamePanel').classList.add('hidden');
+            grid = [];
+            selectedIcon = null;
+            icons = [];
+        }
+    </script>
+</body>
+
+</html>
